@@ -1,13 +1,13 @@
 package ru.greenatom.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.greenatom.model.message.MessageDto;
-import ru.greenatom.model.topic.Topic;
-import ru.greenatom.model.topic.TopicDto;
-import ru.greenatom.model.topic.TopicWithMessage;
-import ru.greenatom.model.topic.TopicWithMessageDto;
+import ru.greenatom.model.topic.*;
 import ru.greenatom.service.TopicService;
 
 import java.util.List;
@@ -53,8 +53,10 @@ public class TopicController {
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Topic> listAllTopics() {
-        return topicService.listAllTopics();
+    public Page<Topic> listAllTopics(@RequestParam(name = "page", defaultValue = "0") int page,
+                                     @RequestParam(name = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return topicService.listAllTopics(pageable);
     }
 
     /*
@@ -63,8 +65,11 @@ public class TopicController {
      */
     @GetMapping("/{topicId}")
     @ResponseStatus(HttpStatus.OK)
-    public TopicWithMessage listTopicMessage(@PathVariable("topicId") UUID topicId) {
-        return topicService.listTopicMessage(topicId);
+    public TopicPageMessage listTopicMessage(@PathVariable("topicId") UUID topicId,
+                                             @RequestParam(name = "page", defaultValue = "0") int page,
+                                             @RequestParam(name = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return topicService.listTopicMessage(topicId, pageable);
     }
 
     /*

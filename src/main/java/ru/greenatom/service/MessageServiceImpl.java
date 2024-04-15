@@ -1,6 +1,8 @@
 package ru.greenatom.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.greenatom.exception.message.MessageNotFoundException;
 import ru.greenatom.model.message.Message;
@@ -20,8 +22,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message createMessage(MessageDto messageDto) {
+    public Message createMessage(MessageDto messageDto, UUID topicId) {
         Message message = new Message(
+                topicId,
                 messageDto.getText(),
                 messageDto.getAuthor()
         );
@@ -51,5 +54,10 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new MessageNotFoundException(MessageFormat.format(
                         "Сообщение с ID: {0} не найдено.", messageId
                 )));
+    }
+
+    @Override
+    public Page<Message> findByTopicId(UUID topicId, Pageable pageable) {
+        return messageRepository.findByTopicId(topicId.toString(), pageable);
     }
 }

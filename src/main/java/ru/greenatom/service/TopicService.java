@@ -1,10 +1,9 @@
 package ru.greenatom.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import ru.greenatom.model.message.MessageDto;
-import ru.greenatom.model.topic.Topic;
-import ru.greenatom.model.topic.TopicDto;
-import ru.greenatom.model.topic.TopicWithMessage;
-import ru.greenatom.model.topic.TopicWithMessageDto;
+import ru.greenatom.model.topic.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,9 +13,9 @@ public interface TopicService {
 
     TopicWithMessage updateTopic(UUID topicId, TopicDto updateTopic);
 
-    List<Topic> listAllTopics();
+    Page<Topic> listAllTopics(Pageable pageable);
 
-    TopicWithMessage listTopicMessage(UUID topicId);
+    TopicPageMessage listTopicMessage(UUID topicId, Pageable pageable);
 
     TopicWithMessage createMessage(UUID topicId, MessageDto messageDto);
 

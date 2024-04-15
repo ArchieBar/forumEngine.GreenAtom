@@ -1,6 +1,8 @@
 package ru.greenatom.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.greenatom.exception.topic.TopicNotFoundException;
 import ru.greenatom.model.message.Message;
@@ -9,8 +11,6 @@ import ru.greenatom.model.topic.*;
 import ru.greenatom.repository.TopicRepository;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,16 +24,14 @@ public class TopicServiceImpl implements TopicService {
         this.messageService = messageService;
     }
 
-    //TODO
-    // Вместо проверки на дубликат темы, добавить ограничение в бд на уникальность значения
     @Override
     public TopicWithMessage createTopic(TopicWithMessageDto newTopic) {
-        List<Message> messages = new ArrayList<>();
-        messages.add(messageService.createMessage(newTopic.getMessage()));
         TopicWithMessage topicWithMessage = new TopicWithMessage(
-                newTopic.getTopicName(),
-                messages
+                newTopic.getTopicName()
         );
+        Message message = messageService.createMessage(newTopic.getMessage(),
+                UUID.fromString(topicWithMessage.getId()));
+        topicWithMessage.addMessage(message);
         return topicRepository.saveAndFlush(topicWithMessage);
     }
 
@@ -48,16 +46,19 @@ public class TopicServiceImpl implements TopicService {
     }
 
     @Override
-    public List<Topic> listAllTopics() {
-        return TopicMapper.toTopicList(topicRepository.findAll());
+    public Page<Topic> listAllTopics(Pageable pageable) {
+        return topicRepository.findAll(pageable)
+                .map(TopicMapper::toTopic);
     }
 
     @Override
-    public TopicWithMessage listTopicMessage(UUID topicId) {
-        return topicRepository.findById(topicId.toString())
+    public TopicPageMessage listTopicMessage(UUID topicId, Pageable pageable) {
+        Topic topic = TopicMapper.toTopic(topicRepository.findById(topicId.toString())
                 .orElseThrow(() -> new TopicNotFoundException(MessageFormat.format(
                         "Тема с ID: {0} не найдена", topicId
-                )));
+                ))));
+        Page<Message> messages = messageService.findByTopicId(topicId, pageable);
+        return new TopicPageMessage(topic, messages);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class TopicServiceImpl implements TopicService {
                 .orElseThrow(() -> new TopicNotFoundException(MessageFormat.format(
                         "Тема с ID: {0} не найдена", topicId
                 )));
-        topicWithMessage.addMessage(messageService.createMessage(messageDto));
+        topicWithMessage.addMessage(messageService.createMessage(messageDto, topicId));
         return topicRepository.saveAndFlush(topicWithMessage);
     }
 

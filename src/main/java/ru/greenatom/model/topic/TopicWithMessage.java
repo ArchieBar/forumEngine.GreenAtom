@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter @Setter @ToString
@@ -22,6 +23,11 @@ public class TopicWithMessage extends Topic {
     public TopicWithMessage(String name, List<Message> messages) {
         super(name);
         this.messages = messages;
+    }
+
+    public TopicWithMessage(String name) {
+        super(name);
+        this.messages = new ArrayList<>();
     }
 
     public void addMessage(Message message) {

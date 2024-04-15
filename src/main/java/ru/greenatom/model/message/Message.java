@@ -15,14 +15,15 @@ import java.util.UUID;
 @Entity
 public class Message {
     @Id
-    //@GeneratedValue(strategy = GenerationType.AUTO)
     private String id;
+    private String topicId;
     private String text;
     private String author;
     private LocalDateTime created;
 
-    public Message(String text, String author) {
+    public Message(UUID topicId, String text, String author) {
         this.id = UUID.randomUUID().toString();
+        this.topicId = topicId.toString();
         this.text = text;
         this.author = author;
         this.created = LocalDateTime.now();
